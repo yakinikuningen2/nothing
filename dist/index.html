@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#050505">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="何もありません。">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="description" content="ここには何もありません。たぶん。暗闇に隠された実績を探す、音のないブラウザゲーム。">
+  <title>何もありません。</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23050505'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='%23888880'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css?v=discoverable-dot">
+  <script src="config.js" defer></script>
+  <script src="core.js?v=discoverable-dot" defer></script>
+  <script src="app.js?v=discoverable-dot" defer></script>
+</head>
+<body>
+  <main id="world" aria-label="暗闇のプレイ領域" tabindex="0">
+    <div class="grain" aria-hidden="true"></div>
+    <div class="frame" aria-hidden="true"></div>
+    <header class="masthead">
+      <div class="header-controls">
+        <button id="fullscreen-toggle" class="fullscreen-toggle" data-fullscreen="icon" aria-label="全画面にする" aria-pressed="false" title="全画面にする"><svg viewBox="0 0 20 20" aria-hidden="true"><path class="expand-icon" d="M7 3H3v4m10-4h4v4M3 13v4h4m6 0h4v-4"/><path class="collapse-icon" d="M3 7h4V3m6 0v4h4M7 17v-4H3m10 4v-4h4"/></svg></button>
+      </div>
+    </header>
+    <div class="centerpiece">
+      <h1><button id="game-title">何もありません<span id="period">。</span></button></h1>
+    </div>
+    <button id="hidden-dot" class="hidden-dot" aria-label="小さな点"></button>
+    <footer class="footbar">
+      <nav aria-label="ゲームメニュー">
+        <button data-open="achievements" aria-label="実績を開く" title="実績"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="4" width="12" height="12" rx="1"/><path d="M7 8h6M7 12h4"/></svg></button>
+        <button data-open="results" aria-label="結果を開く" title="結果"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 16h12M6 12V8m4 4V4m4 8V6"/></svg></button>
+        <button data-open="settings" aria-label="設定を開く" title="設定"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="5"/><circle cx="10" cy="10" r="1.5"/><path d="M10 2v3m0 10v3M2 10h3m10 0h3"/></svg></button>
+      </nav>
+    </footer>
+    <div id="hold-ring" aria-hidden="true"></div>
+    <div id="trace" aria-hidden="true"></div>
+  </main>
+  <div id="toast-region" aria-label="実績通知" aria-live="polite"></div>
+  <p id="status" class="status" role="status"></p>
+  <dialog id="panel" aria-labelledby="panel-title">
+    <div class="panel-head"><h2 id="panel-title">実績</h2><button class="close" id="close-panel" aria-label="閉じる">×</button></div>
+    <div id="panel-content"></div>
+  </dialog>
+  <dialog id="detail" aria-labelledby="detail-title"><div class="detail-inner"><p class="eyebrow" id="detail-kicker"></p><h2 id="detail-title"></h2><p id="detail-body"></p><p id="detail-hint" class="hint"></p><div class="button-row"><button id="show-hint" class="button">ヒントを見る</button><button id="close-detail" class="button">閉じる</button></div></div></dialog>
+</body>
+</html>
