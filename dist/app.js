@@ -109,8 +109,8 @@
   $('#close-detail').onclick=()=>detail.close();
   $('#show-hint').onclick=()=>{if(currentDetail)$('#detail-hint').textContent=currentDetail.condition;};
 function renderArchive(){
-  const s=engine.summary();$('#panel-content').innerHTML=`<div class="archive-top"><span class="archive-number">${s.count} <small>/ ${s.total}</small></span></div><div class="progress-track"><span style="width:${s.percent}%"></span></div>${developmentMode?'<p class="setting-note dev-note">開発用：達成方法をすべて表示</p>':''}<div class="archive-tools"><button id="archive-replay" class="button">通知を再表示</button></div><div class="filters"><select id="rarity-filter" aria-label="実績の表示"><option value="all">すべて</option><option value="unlocked">解除済み</option><option value="locked">未解除</option><option value="rare">稀有</option></select></div><div id="achievement-list"></div><div class="archive-bottom"><button id="bottom-mark" aria-label="余白の印">＿</button></div>`;
-  $('#archive-replay').onclick=replayNotification;$('#rarity-filter').value=currentFilter;
+  const s=engine.summary();$('#panel-content').innerHTML=`<div class="archive-top"><span class="archive-number">${s.count} <small>/ ${s.total}</small></span></div><div class="progress-track"><span style="width:${s.percent}%"></span></div>${developmentMode?'<p class="setting-note dev-note">開発用：達成方法をすべて表示</p>':''}<div class="archive-tools"><button id="archive-replay" class="button">通知を再表示</button><button id="archive-keys" class="button">キー操作</button></div><div class="filters"><select id="rarity-filter" aria-label="実績の表示"><option value="all">すべて</option><option value="unlocked">解除済み</option><option value="locked">未解除</option><option value="rare">稀有</option></select></div><div id="achievement-list"></div><div class="archive-bottom"><button id="bottom-mark" aria-label="余白の印">＿</button></div>`;
+  $('#archive-keys').onclick=()=>{panel.close();$('#touch-keys').showModal();};$('#archive-replay').onclick=replayNotification;$('#rarity-filter').value=currentFilter;
   $('#rarity-filter').onchange=e=>{currentFilter=e.target.value;if(currentFilter==='rare')emit('rare');drawCards();};
   $('#bottom-mark').onclick=()=>{emit('bottom');drawCards();};drawCards();
 }
@@ -151,7 +151,7 @@ function renderSettings(){
     $('#show-hint').onclick=()=>{
       restarted=true;runVersion++;clearTimeout(titleTimer);clearTimeout(resizeTimer);clearGesture();touches.clear();corners.clear();sequence=[];
       lastTap=0;lastTapPoint=null;previousDirection='';lastDirectionAt=0;hiddenAt=null;currentFilter='all';
-      engine.reset();engine.visit();clearToasts();
+      engine.reset();discoveries.reset();engine.visit();clearToasts();
       detail.close();panel.close();updateWorld();lastActivity=performance.now();world.focus();message('実績0個から、始めました。');
     };
     $('#close-detail').textContent='続ける';$('#close-detail').onclick=()=>detail.close();
@@ -160,12 +160,11 @@ function renderSettings(){
       $('#close-detail').textContent='閉じる';$('#close-detail').onclick=()=>detail.close();
     },{once:true});detail.showModal();
   }
-  function shareText(){const s=engine.summary();return`『何もありません。』\n${s.count}/${s.total} 実績発見\n称号：${s.title}\n最もレアな実績：${s.rarest?s.rarest.name:'まだ、何も。'}\n#何もありません`+(location.protocol.startsWith('http')?'\n'+location.href.split('?')[0].split('#')[0]:'');}
-  function renderResults(){const s=engine.summary();$('#panel-content').innerHTML=`<div class="result-card"><div class="result-score">${String(s.count).padStart(2,'0')} <small>/ ${s.total}</small></div><div class="result-rank">${s.title}</div><dl class="result-stats"><div><dt>解除率</dt><dd>${s.percent}%</dd></div><div><dt>まだ見ぬ実績</dt><dd>${s.remaining}</dd></div></dl><p class="result-rare">最もレアな発見<br><span>${s.rarest?s.rarest.name+' · '+s.rarest.rarityName:'まだ、何も。'}</span></p></div><div class="button-row"><button id="share-x" class="button">Xで共有</button><button id="copy-result" class="button">テキストをコピー</button></div><p class="share-note">Xの投稿画面が開きます。投稿はご自身で確定してください。</p><div id="copy-fallback"></div><div class="leave"><button id="leave-nothing" class="text-link">何も持ち帰らない</button><small id="leave-note">少しだけ、手を止めて。</small></div>`;
+  function shareText(includeCopy=false){let state=engine.state;if(includeCopy&&!Object.hasOwn(state.unlocked,'copy')){state={...state,unlocked:{...state.unlocked,copy:1}};if(C.achievements.filter(a=>a.id!=='complete').every(a=>Object.hasOwn(state.unlocked,a.id)))state.unlocked.complete=1;}const s=C.summary(state);return`『何もありません。』\n${s.count}/${s.total} 実績発見\n称号：${s.title}\n最もレアな実績：${s.rarest?s.rarest.name:'まだ、何も。'}\n#何もありません`+(location.protocol.startsWith('http')?'\n'+location.href.split('?')[0].split('#')[0]:'');}
+  function renderResults(){const s=engine.summary();$('#panel-content').innerHTML=`<div class="result-card"><div class="result-score">${String(s.count).padStart(2,'0')} <small>/ ${s.total}</small></div><div class="result-rank">${s.title}</div><dl class="result-stats"><div><dt>解除率</dt><dd>${s.percent}%</dd></div><div><dt>まだ見ぬ実績</dt><dd>${s.remaining}</dd></div></dl><p class="result-rare">最もレアな発見<br><span>${s.rarest?s.rarest.name+' · '+s.rarest.rarityName:'まだ、何も。'}</span></p></div><div class="button-row"><button id="share-x" class="button">Xで共有</button><button id="copy-result" class="button">テキストをコピー</button></div><p class="share-note">Xの投稿画面が開きます。投稿はご自身で確定してください。</p><div id="copy-fallback"></div>`;
     $('#copy-result').onclick=copyResult;$('#share-x').onclick=()=>window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(shareText()),'_blank','noopener,noreferrer');
-    if($('#leave-nothing')){let timer;const b=$('#leave-nothing');const start=()=>{if(timer)return;$('#leave-note').textContent='そのまま、少しだけ。';const version=runVersion;timer=setTimeout(()=>{if(version!==runVersion)return;emit('leave');$('#leave-note').textContent='何も持たなくても、記録は残る。';timer=null;},3000);};const stop=()=>{clearTimeout(timer);timer=null;};b.onpointerdown=e=>{b.setPointerCapture(e.pointerId);start();};b.onpointerup=stop;b.onpointercancel=stop;b.onkeydown=e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();start();}};b.onkeyup=stop;b.onblur=stop;}
   }
-  async function copyResult(){const version=runVersion;try{if(!navigator.clipboard?.writeText)throw Error('manual');await navigator.clipboard.writeText(shareText());if(version!==runVersion)return;emit('copy');message('投稿用テキストをコピーしました。');}catch{if(version!==runVersion)return;const host=$('#copy-fallback');host.innerHTML='<textarea id="manual-text" class="manual-copy" aria-label="コピーする結果テキスト" readonly></textarea><div class="button-row"><button id="copied-manually" class="button">コピーしました</button></div><p class="share-note">テキストを選択してコピーし、完了を押してください。</p>';$('#manual-text').value=shareText();$('#manual-text').focus();$('#manual-text').select();$('#manual-text').oncopy=()=>{emit('copy');message('投稿用テキストをコピーしました。');};$('#copied-manually').onclick=()=>{emit('copy');message('記録を持ち帰りました。');};}}
+  async function copyResult(){const version=runVersion;try{if(!navigator.clipboard?.writeText)throw Error('manual');await navigator.clipboard.writeText(shareText(true));if(version!==runVersion)return;emit('copy');message('投稿用テキストをコピーしました。');}catch{if(version!==runVersion)return;const host=$('#copy-fallback');host.innerHTML='<textarea id="manual-text" class="manual-copy" aria-label="コピーする結果テキスト" readonly></textarea><div class="button-row"><button id="copied-manually" class="button">コピーしました</button></div><p class="share-note">テキストを選択してコピーし、完了を押してください。</p>';$('#manual-text').value=shareText(true);$('#manual-text').focus();$('#manual-text').select();$('#manual-text').oncopy=()=>{emit('copy');message('投稿用テキストをコピーしました。');};$('#copied-manually').onclick=()=>{emit('copy');message('記録を持ち帰りました。');};}}
   function isNearCenter(clientX,clientY){
     const area=world.getBoundingClientRect(),title=$('#game-title').getBoundingClientRect();
     const x=clientX-area.left,y=clientY-area.top;
@@ -209,7 +208,7 @@ function renderSettings(){
   function clearGesture(){clearTimeout(holdTimer);gesture=null;$('#hold-ring').style.display='none';$('#trace').style.display='none';}
   world.addEventListener('pointerup',e=>{touches.delete(e.pointerId);if(!gesture||gesture.id!==e.pointerId)return;const g=gesture,elapsed=performance.now()-g.start;if(!g.moved){if(elapsed>=1600)emit('hold');if(elapsed>=2600&&elapsed<=3400)emit('timing');}for(const t of C.analyzeGesture(g.points,g.w,g.h)){if(t.startsWith('swipe'))direction(t==='swipeUp'?'up':'down');else emit(t);}clearGesture();});
   world.addEventListener('pointercancel',e=>{touches.delete(e.pointerId);clearGesture();});
-  world.addEventListener('contextmenu',e=>{if(!interactive(e.target)){e.preventDefault();emit('context');}});
+  world.addEventListener('contextmenu',e=>{e.preventDefault();if(!interactive(e.target)&&!panel.open&&!detail.open)emit('context');});
   world.addEventListener('wheel',e=>{if(!interactive(e.target)&&e.deltaY)direction(e.deltaY>0?'down':'up');},{passive:true});
   let sequence=[];const targetSequence=['↑','↑','↓','↓','←','→','←','→','B','A'];
   function handleKey(key){const k=({ArrowUp:'↑',ArrowDown:'↓',ArrowLeft:'←',ArrowRight:'→'}[key]||key).toUpperCase();emit('key');if(k==='ESCAPE')emit('escape');sequence.push(k);sequence=sequence.slice(-10);if(sequence.join(',')===targetSequence.join(','))emit('sequence');}
@@ -231,5 +230,6 @@ function renderSettings(){
   setInterval(()=>{if(document.hidden||panel.open||detail.open)return;const idle=performance.now()-lastActivity;if(idle>=10000)emit('idle10');if(idle>=45000)emit('idle45');if(gesture&&!gesture.moved)$('#hold-ring').style.setProperty('--sweep',Math.min(360,(performance.now()-gesture.start)/3000*360)+'deg');},80);
   // Keep time feedback running during a press, even though a press counts as activity.
   window.addEventListener('pagehide',()=>engine.save());
+  const discoveries=window.NothingDiscoveriesUI.install({engine,emit,isReduced,getLastActivity:()=>lastActivity,handleKey});
   engine.visit();updateWorld();
 })();

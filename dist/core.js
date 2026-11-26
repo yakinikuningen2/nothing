@@ -1,5 +1,6 @@
 (function (root) {
   'use strict';
+  const D=typeof module!=='undefined'&&module.exports?require('./discoveries.js'):root.NothingDiscoveries;
   // Definition + rule live together. New achievements do not require changing the engine.
   const rows = [
     ['first','最初の接触','クリックする。','input','contact',1,false],
@@ -44,13 +45,23 @@
     ['resize','部屋のかたち','ウィンドウの大きさを変える。','meta','resize',2,true],
     ['fullscreen','暗闇に入る','全画面に切り替える。','meta','fullscreen',2,false],
     ['undo','戻せないもの','元に戻そうとする。','meta','undo',2,true],
-    ['leave','何も持ち帰らない','何も持ち帰らずに待つ。','puzzle','leave',4,true],
+    ['rageClick','虚無への八つ当たり','同じ場所を繰り返しクリックする。','input','rageClick',2,true],
+    ['cornerOrder','そこじゃない','左上、右上、左下、右下の順に触れる。','puzzle','cornerOrder',2,true],
+    ['rapidClick','連打の達人','素早く連打する。','input','rapidClick',2,true],
+    ['suddenRush','急にどうした','何もしない時間のあと、急に連打する。','time','suddenRush',3,true],
+    ['mouseWalk','マウスの散歩','カーソルで長い道のりを歩く。','input','mouseWalk',3,true],
+    ['triangle','絵心ゼロ','三角形を描く。','puzzle','triangle',3,true],
+    ['sideSteps','反復横跳び','左右へ大きく素早く往復する。','input','sideSteps',3,true],
+    ['vanishingDot','逃げるな','現れては消える点を捕まえる。','discovery','vanishingDot',3,true],
+    ['invisibleButton','存在しないボタン','かすかな印の内側に触れる。','discovery','invisibleButton',3,true],
+    ['shakyHand','震える手','狭い範囲で小刻みに左右へ往復する。','input','shakyHand',3,true],
+    ['mouseVacation','マウスにも休暇を','よく動かしたカーソルを休ませる。','time','mouseVacation',3,true],
     ['complete','何も、ありました。','すべての実績を見つける。','meta','complete',4,true]
   ];
   const methods = {
   "first": "暗闇の何もない場所をクリックする。",
   "double": "暗闇を素早くダブルクリックする。",
-  "other": "暗闇を右クリックする。",
+  "other": "暗闇を右クリックする。タッチでは長押しする。",
   "hold": "暗闇の同じ場所をマウスで押し続ける。",
   "drag": "暗闇を押したままマウスを動かす。",
   "cross": "暗闇の左端から右端まで、マウスを離さずにドラッグする。",
@@ -58,16 +69,16 @@
   "center": "画面中央の「何もありません。」をクリックする。タイトル周りの暗闇でも達成できる。",
   "circle": "暗闇に大きめの円を描き、描き始めた場所付近まで戻る。",
   "zigzag": "暗闇を押したまま、左右へ何度か折り返す線を描く。",
-  "reverse": "暗闇の上でマウスホイールを上下に続けて回す。",
-  "key": "暗闇でキーボードの文字キーを押す。",
-  "escape": "メニューを閉じた状態でEscapeキーを押す。",
-  "sequence": "暗闇で ↑ ↑ ↓ ↓ ← → ← → B A の順にキーを押す。",
+  "reverse": "暗闇の上でマウスホイールを上下に続けて回す。タッチでは上下になぞる。",
+  "key": "暗闇でキーボードの文字キーを押す。タッチでは実績一覧の「キー操作」でAを押す。",
+  "escape": "メニューを閉じた状態でEscapeキーを押す。タッチでは実績一覧の「キー操作」でEscを押す。",
+  "sequence": "暗闇で ↑ ↑ ↓ ↓ ← → ← → B A の順にキーを押す。タッチでは実績一覧の「キー操作」を使う。",
   "title": "画面中央の「何もありません。」をクリックする。",
   "period": "ゲームタイトルの末尾にある「。」をクリックする。",
   "selection": "タイトルの文字を選択するか、タイトルをマウスで長押しする。別の場所をクリックすると文字選択を解除できる。",
   "dot": "画面の左下寄りにある、小さな灰色の点をクリックする。",
   "edge": "暗闇のきわをクリックする。",
-  "two": "Shiftキーを押したまま、暗闇をクリックする。",
+  "two": "Shiftキーを押したまま、暗闇をクリックする。タッチでは指を同時に置く。",
   "idle10": "メニューを閉じてゲームを表示したまま、マウスやキーに触れず少し待つ。",
   "idle45": "ゲームを表示したまま、マウスやキーに触れずしばらく待ち続ける。",
   "timing": "暗闇を長押しし、表示される輪が閉じるころに離す。",
@@ -76,7 +87,7 @@
   "cancel": "設定の「最初からやり直す」を押し、確認画面で「続ける」を選ぶ。",
   "settings": "下部の設定アイコンをクリックする。",
   "motion": "設定を開き、「動きを減らす」を切り替える。",
-  "selectAll": "メニューを閉じた暗闇でCtrl+Aを押す。MacではCommand+Aを押す。",
+  "selectAll": "メニューを閉じた暗闇でCtrl+Aを押す。MacではCommand+Aを押す。タッチでは実績一覧の「キー操作」で「すべて選択」を押す。",
   "list": "下部の実績アイコンをクリックする。",
   "bottom": "実績一覧を下までスクロールし、末尾の「＿」をクリックする。",
   "locked": "実績一覧で、まだ解除していない実績カードをクリックする。",
@@ -87,17 +98,27 @@
   "replay": "設定の「通知をもう一度見る」か、実績一覧の「通知を再表示」を押す。",
   "result": "下部の結果アイコンをクリックする。",
   "copy": "結果の「テキストをコピー」を押す。手動コピー画面が出た場合はコピーして完了ボタンを押す。",
-  "resize": "ブラウザのウィンドウの大きさを、はっきり変わる程度に変更する。",
+  "resize": "ブラウザのウィンドウの大きさを、はっきり変わる程度に変更する。スマートフォンでは画面を縦横に回す。",
   "fullscreen": "プレイ画面の右上にある全画面アイコンをクリックする。",
-  "undo": "メニューを閉じた暗闇でCtrl+Zを押す。MacではCommand+Zを押す。",
-  "leave": "結果画面の「何も持ち帰らない」をマウスで長押しする。",
+  "undo": "メニューを閉じた暗闇でCtrl+Zを押す。MacではCommand+Zを押す。タッチでは実績一覧の「キー操作」で「元に戻す」を押す。",
+  "rageClick": "暗闇の同じ場所を繰り返しクリック、またはタップする。離れた場所に触れるとやり直し。",
+  "cornerOrder": "暗闇の左上→右上→左下→右下の順にクリック、またはタップする。順番を間違えたら左上から。",
+  "rapidClick": "暗闇を素早く連打する。タップでも達成できる。",
+  "suddenRush": "何も操作せずに少し待ち、その直後に暗闇を素早く続けてクリック、またはタップする。",
+  "mouseWalk": "暗闇の中でマウスをたくさん動かす。タッチでは指でなぞる。移動の進捗は再訪後も残る。",
+  "triangle": "暗闇をドラッグ、または指でなぞり、大きめの三角形を閉じるように描く。",
+  "sideSteps": "暗闇の中でマウスを左右へ大きく素早く何度も往復させる。指でなぞっても達成できる。",
+  "vanishingDot": "暗闇で待つと周期的に現れる点を、消える前にクリック、またはタップする。",
+  "invisibleButton": "暗闇の右下寄りにある、かすかな角の印に挟まれた透明な領域をクリック、またはタップする。",
+  "shakyHand": "暗闇の狭い範囲で、マウスや指を小刻みに素早く左右へ何度も往復させる。",
+  "mouseVacation": "暗闇でマウスや指を大きく素早く動かし、その直後は動かさず少し待つ。",
   "complete": "この実績以外の実績をすべて解除する。"
 };
   const rarities = ['','普通','奇妙','稀有','唯一'];
   const achievements = rows.map(([id,name,description,category,event,rarity,hidden]) => Object.freeze({id,name,description,condition:description,method:methods[id],category,event,rarity,rarityName:rarities[rarity],hidden,test:e=>e.type===event && id!=='complete'}));
   const byId = new Map(achievements.map(a=>[a.id,a]));
   const STORAGE_KEY = 'nothing-is-here.v1';
-  const defaults = () => ({version:1,unlocked:{},settings:{reduceMotion:false},visits:0});
+  const defaults = () => ({version:1,unlocked:{},settings:{reduceMotion:false},visits:0,progress:{walkWidths:0}});
   function sanitize(raw) {
     const out = defaults();
     if(!raw || typeof raw!=='object') return out;
@@ -105,6 +126,7 @@
     const s=raw.settings||{};
     out.settings={reduceMotion:s.reduceMotion===true};
     out.visits=Number.isSafeInteger(raw.visits)&&raw.visits>=0?raw.visits:0;
+    const walk=raw.progress?.walkWidths;out.progress.walkWidths=typeof walk==='number'&&Number.isFinite(walk)?Math.min(100,Math.max(0,walk)):0;
     return out;
   }
   function summary(state) {
@@ -134,7 +156,7 @@
     const result=[];
     if(distance>=120)result.push('drag');
     if(a.x<w*.12&&b.x>w*.88)result.push('cross');
-    if(bw>90&&bh>90&&Math.hypot(a.x-b.x,a.y-b.y)<Math.max(bw,bh)*.4&&Math.abs(angle)>Math.PI*1.6)result.push('circle');
+    if(D.shapes(points).includes('circle'))result.push('circle');
     if(turns>=3&&bw>90&&distance>250)result.push('zigzag');
     if(Math.abs(b.y-a.y)>70&&bh>bw)result.push(b.y>a.y?'swipeDown':'swipeUp');
     return result;
